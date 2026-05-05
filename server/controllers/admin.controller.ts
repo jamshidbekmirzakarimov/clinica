@@ -261,3 +261,32 @@ export const deleteCashier = async (req: Request, res: Response): Promise<any> =
         res.status(500).json({ message: 'Internal server error' });
     }
 };
+
+// --- APPOINTMENTS ---
+
+export const getAppointments = async (req: Request, res: Response): Promise<any> => {
+    try {
+        const query = `
+            SELECT 
+                a.id as appointment_id,
+                a.appointment_time,
+                p.id as patient_id,
+                p.name as patient_name,
+                p.phone as patient_phone,
+                d.id as doctor_id,
+                u.fullname as doctor_name,
+                d.specialization as doctor_specialization
+            FROM appointment a
+            JOIN patients p ON a.patient_id = p.id
+            JOIN doctors d ON a.doctor_id = d.id
+            JOIN users u ON d.user_id = u.id
+            ORDER BY a.appointment_time DESC
+        `;
+        const result = await pool.query(query);
+        res.status(200).json({ appointments: result.rows });
+    } catch (error) {
+        console.error('Get appointments error:', error);
+        res.status(500).json({ message: 'Internal server error' });
+    }
+};
+
