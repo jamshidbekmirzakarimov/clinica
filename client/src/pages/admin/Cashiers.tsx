@@ -1,15 +1,33 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Plus, Edit2, Trash2, Search } from 'lucide-react';
-import { mockCashiers } from '../../data/mockData';
 import { Cashier } from '../../types';
 import { Modal } from '../../components/ui/Modal';
 import api from '../../utils/api';
 
 export function AdminCashiers() {
-  const [cashiers, setCashiers] = useState<Cashier[]>(mockCashiers);
+  const [cashiers, setCashiers] = useState<Cashier[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingCashier, setEditingCashier] = useState<Cashier | null>(null);
+
+  useEffect(() => {
+    const fetchCashiers = async () => {
+      try {
+        const response = await api.get('/admin/cashiers');
+        const fetchedCashiers: Cashier[] = response.data.cashiers.map((c: any) => ({
+          id: String(c.id),
+          name: c.fullname,
+          email: c.email,
+          phone: c.phone || 'N/A'
+        }));
+        setCashiers(fetchedCashiers);
+      } catch (error) {
+        console.error('Failed to fetch cashiers:', error);
+      }
+    };
+    fetchCashiers();
+  }, []);
+
   const [formData, setFormData] = useState({
     name: '',
     phone: '',
@@ -43,12 +61,19 @@ export function AdminCashiers() {
     e.preventDefault();
     try {
       if (editingCashier) {
+        await api.put(`/admin/cashiers/${editingCashier.id}`, {
+          fullname: formData.name,
+          email: formData.email,
+          password: formData.password || undefined
+        });
         setCashiers(
           cashiers.map((c) =>
           c.id === editingCashier.id ?
           {
-            ...formData,
-            id: c.id
+            ...c,
+            name: formData.name,
+            email: formData.email,
+            phone: formData.phone
           } :
           c
           )
@@ -76,9 +101,15 @@ export function AdminCashiers() {
       alert(error.response?.data?.message || 'Failed to save cashier');
     }
   };
-  const handleDelete = (id: string) => {
+  const handleDelete = async (id: string) => {
     if (window.confirm('Are you sure you want to delete this cashier?')) {
-      setCashiers(cashiers.filter((c) => c.id !== id));
+      try {
+        await api.delete(`/admin/cashiers/${id}`);
+        setCashiers(cashiers.filter((c) => c.id !== id));
+      } catch (error: any) {
+        console.error('Failed to delete cashier:', error);
+        alert(error.response?.data?.message || 'Failed to delete cashier');
+      }
     }
   };
   return (

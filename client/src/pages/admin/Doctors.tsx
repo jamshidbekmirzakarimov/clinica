@@ -1,15 +1,35 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Plus, Edit2, Trash2, Search } from 'lucide-react';
-import { mockDoctors } from '../../data/mockData';
 import { Doctor } from '../../types';
 import { Modal } from '../../components/ui/Modal';
 import api from '../../utils/api';
 
 export function AdminDoctors() {
-  const [doctors, setDoctors] = useState<Doctor[]>(mockDoctors);
+  const [doctors, setDoctors] = useState<Doctor[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingDoctor, setEditingDoctor] = useState<Doctor | null>(null);
+
+  useEffect(() => {
+    const fetchDoctors = async () => {
+      try {
+        const response = await api.get('/admin/doctors');
+        const fetchedDoctors: Doctor[] = response.data.doctors.map((d: any) => ({
+          id: String(d.doctor_id),
+          name: d.fullname,
+          specialty: d.specialization,
+          phone: d.phone,
+          email: d.email,
+          schedule: 'TBD'
+        }));
+        setDoctors(fetchedDoctors);
+      } catch (error) {
+        console.error('Failed to fetch doctors:', error);
+      }
+    };
+    fetchDoctors();
+  }, []);
+
   // Form state
   const [formData, setFormData] = useState({
     name: '',
@@ -52,6 +72,13 @@ export function AdminDoctors() {
     e.preventDefault();
     try {
       if (editingDoctor) {
+        await api.put(`/admin/doctors/${editingDoctor.id}`, {
+          fullname: formData.name,
+          email: formData.email,
+          password: formData.password || undefined,
+          specialization: formData.specialty,
+          phone: formData.phone
+        });
         setDoctors(
           doctors.map((d) =>
           d.id === editingDoctor.id ?
@@ -93,9 +120,15 @@ export function AdminDoctors() {
       alert(error.response?.data?.message || 'Failed to save doctor');
     }
   };
-  const handleDelete = (id: string) => {
+  const handleDelete = async (id: string) => {
     if (window.confirm('Are you sure you want to delete this doctor?')) {
-      setDoctors(doctors.filter((d) => d.id !== id));
+      try {
+        await api.delete(`/admin/doctors/${id}`);
+        setDoctors(doctors.filter((d) => d.id !== id));
+      } catch (error: any) {
+        console.error('Failed to delete doctor:', error);
+        alert(error.response?.data?.message || 'Failed to delete doctor');
+      }
     }
   };
   return (
