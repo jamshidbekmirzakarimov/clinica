@@ -1,7 +1,8 @@
 import { Router } from 'express';
 import { 
     createDoctor, getDoctors, updateDoctor, deleteDoctor,
-    createCashier, getCashiers, updateCashier, deleteCashier
+    createCashier, getCashiers, updateCashier, deleteCashier,
+    getAppointments
 } from '../controllers/admin.controller';
 import { authenticateToken } from '../middleware/auth.middleware';
 import { authorizeAdmin } from '../middleware/role.middleware';
@@ -272,5 +273,24 @@ router.put('/cashiers/:id', authenticateToken, authorizeAdmin, updateCashier);
  *         description: Forbidden
  */
 router.delete('/cashiers/:id', authenticateToken, authorizeAdmin, deleteCashier);
+
+/**
+ * @swagger
+ * /api/admin/appointments:
+ *   get:
+ *     summary: Get all appointments (Admin only)
+ *     description: Retrieve all appointments showing which patient is assigned to which doctor.
+ *     tags: [Admin]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: A list of appointments
+ *       401:
+ *         description: Unauthorized
+ *       403:
+ *         description: Forbidden
+ */
+router.get('/appointments', authenticateToken, authorizeAdmin, getAppointments);
 
 export default router;
