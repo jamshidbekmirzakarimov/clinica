@@ -12,8 +12,12 @@ const router = Router();
 /**
  * @swagger
  * tags:
- *   name: Admin
- *   description: Administrative operations
+ *   - name: Admin - Doctors
+ *     description: Administrative operations for Doctors
+ *   - name: Admin - Cashiers
+ *     description: Administrative operations for Cashiers
+ *   - name: Admin - Appointments
+ *     description: Administrative operations for Appointments
  */
 
 /**
@@ -21,7 +25,7 @@ const router = Router();
  * /api/admin/doctors:
  *   post:
  *     summary: Create a new doctor (Admin only)
- *     tags: [Admin]
+ *     tags: [Admin - Doctors]
  *     security:
  *       - bearerAuth: []
  *     requestBody:
@@ -66,7 +70,7 @@ router.post('/doctors', authenticateToken, authorizeAdmin, createDoctor);
  * /api/admin/doctors:
  *   get:
  *     summary: Get all doctors (Admin only)
- *     tags: [Admin]
+ *     tags: [Admin - Doctors]
  *     security:
  *       - bearerAuth: []
  *     responses:
@@ -84,7 +88,7 @@ router.get('/doctors', authenticateToken, authorizeAdmin, getDoctors);
  * /api/admin/doctors/{id}:
  *   put:
  *     summary: Update a doctor by doctor_id (Admin only)
- *     tags: [Admin]
+ *     tags: [Admin - Doctors]
  *     security:
  *       - bearerAuth: []
  *     parameters:
@@ -128,7 +132,7 @@ router.put('/doctors/:id', authenticateToken, authorizeAdmin, updateDoctor);
  * /api/admin/doctors/{id}:
  *   delete:
  *     summary: Delete a doctor by doctor_id (Admin only)
- *     tags: [Admin]
+ *     tags: [Admin - Doctors]
  *     security:
  *       - bearerAuth: []
  *     parameters:
@@ -155,7 +159,7 @@ router.delete('/doctors/:id', authenticateToken, authorizeAdmin, deleteDoctor);
  * /api/admin/cashiers:
  *   post:
  *     summary: Create a new cashier (Admin only)
- *     tags: [Admin]
+ *     tags: [Admin - Cashiers]
  *     security:
  *       - bearerAuth: []
  *     requestBody:
@@ -194,7 +198,7 @@ router.post('/cashiers', authenticateToken, authorizeAdmin, createCashier);
  * /api/admin/cashiers:
  *   get:
  *     summary: Get all cashiers (Admin only)
- *     tags: [Admin]
+ *     tags: [Admin - Cashiers]
  *     security:
  *       - bearerAuth: []
  *     responses:
@@ -212,7 +216,7 @@ router.get('/cashiers', authenticateToken, authorizeAdmin, getCashiers);
  * /api/admin/cashiers/{id}:
  *   put:
  *     summary: Update a cashier by user_id (Admin only)
- *     tags: [Admin]
+ *     tags: [Admin - Cashiers]
  *     security:
  *       - bearerAuth: []
  *     parameters:
@@ -252,7 +256,7 @@ router.put('/cashiers/:id', authenticateToken, authorizeAdmin, updateCashier);
  * /api/admin/cashiers/{id}:
  *   delete:
  *     summary: Delete a cashier by user_id (Admin only)
- *     tags: [Admin]
+ *     tags: [Admin - Cashiers]
  *     security:
  *       - bearerAuth: []
  *     parameters:
@@ -280,7 +284,7 @@ router.delete('/cashiers/:id', authenticateToken, authorizeAdmin, deleteCashier)
  *   get:
  *     summary: Get all appointments (Admin only)
  *     description: Retrieve all appointments showing which patient is assigned to which doctor.
- *     tags: [Admin]
+ *     tags: [Admin - Appointments]
  *     security:
  *       - bearerAuth: []
  *     responses:
