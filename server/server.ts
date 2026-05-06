@@ -15,6 +15,7 @@ app.use(cors({
   allowedHeaders: '*',
   credentials: false
 }));
+
 app.use(express.json())
 
 app.use('/api/auth', authRoutes)
