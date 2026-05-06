@@ -33,7 +33,8 @@ api.interceptors.response.use(
         const refreshToken = useAuthStore.getState().refreshToken;
         if (!refreshToken) throw new Error('No refresh token');
 
-        const response = await axios.post(`${import.meta.env.VITE_API_URL}/auth/refresh`, {
+        const baseUrl = import.meta.env.VITE_API_URL || 'https://clinica-1-o4l9.onrender.com/api';
+        const response = await axios.post(`${baseUrl}/auth/refresh`, {
           refreshToken,
         });
 

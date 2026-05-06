@@ -9,7 +9,12 @@ import { setupSwagger } from "./config/swagger"
 
 const app = express()
 
-app.use(cors())
+app.use(cors({
+  origin: '*',
+  methods: '*',
+  allowedHeaders: '*',
+  credentials: false
+}));
 app.use(express.json())
 
 app.use('/api/auth', authRoutes)
