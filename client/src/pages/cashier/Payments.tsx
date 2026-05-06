@@ -21,10 +21,8 @@ export function CashierPayments() {
       // For now, let's assume we can fetch them or we'll need to add the endpoint.
       // Checking backend... wait, I didn't add GET payments to cashier.controller.ts!
       // I'll need to add it.
-      const response = await api.get('/admin/appointments'); // Reusing admin view for now or similar
-      // Actually let's assume we have a way to see payments.
-      // I'll add the endpoint to backend in the next step.
-      setPayments([]); // Placeholder
+      const response = await api.get('/cashier/payments');
+      setPayments(response.data.payments);
     } catch (error) {
       toast.error('Failed to load payments');
     } finally {

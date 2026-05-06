@@ -18,7 +18,7 @@ export function CreateAppointment() {
   // Selection state
   const [selectedPatientId, setSelectedPatientId] = useState('');
   const [selectedDoctorId, setSelectedDoctorId] = useState('');
-  const [selectedSlotId, setSelectedSlotId] = useState('');
+  const [appointmentTime, setAppointmentTime] = useState('');
   const [paymentAmount, setPaymentAmount] = useState('50000'); // Default price
   const [paymentStatus, setPaymentStatus] = useState<PaymentStatus>('paid');
 
@@ -58,7 +58,7 @@ export function CreateAppointment() {
   };
 
   const handleFinish = async () => {
-    if (!selectedPatientId || !selectedDoctorId || !selectedSlotId) {
+    if (!selectedPatientId || !selectedDoctorId || !appointmentTime) {
       toast.error('Please complete all steps');
       return;
     }
@@ -66,11 +66,10 @@ export function CreateAppointment() {
     setIsLoading(true);
     try {
       // 1. Create Appointment
-      const slot = schedule.find(s => String(s.id) === selectedSlotId);
       const appRes = await api.post('/cashier/appointments', {
         doctor_id: parseInt(selectedDoctorId),
         patient_id: parseInt(selectedPatientId),
-        appointment_time: slot.available_time
+        appointment_time: appointmentTime
       });
 
       const appointmentId = appRes.data.appointment.id;
@@ -168,47 +167,34 @@ export function CreateAppointment() {
         {step === 2 && (
           <div className="p-8 space-y-8 animate-in fade-in slide-in-from-right-4 duration-500">
             <div className="text-center space-y-2">
-              <h2 className="text-2xl font-black text-slate-800">Choose Available Time</h2>
-              <p className="text-slate-500 text-sm font-medium">Picking a slot for Dr. {doctors.find(d => String(d.doctor_id) === selectedDoctorId)?.doctor_name}</p>
+              <h2 className="text-2xl font-black text-slate-800">Select Date & Time</h2>
+              <p className="text-slate-500 text-sm font-medium">Schedule the visit with Dr. {doctors.find(d => String(d.doctor_id) === selectedDoctorId)?.doctor_name}</p>
             </div>
 
-            {isLoading ? (
-              <div className="py-20 flex flex-col items-center gap-4">
-                <Loader2 className="w-10 h-10 text-primary-600 animate-spin" />
-                <p className="text-slate-400 font-bold animate-pulse">Fetching doctor availability...</p>
+            <div className="max-w-md mx-auto space-y-4">
+              <div className="space-y-2">
+                <label className="flex items-center gap-2 text-xs font-black text-slate-400 uppercase tracking-widest ml-1">
+                  <Calendar className="w-4 h-4" /> Appointment Date & Time
+                </label>
+                <input
+                  type="datetime-local"
+                  value={appointmentTime}
+                  onChange={(e) => setAppointmentTime(e.target.value)}
+                  className="w-full px-6 py-4 bg-slate-50 border-2 border-slate-100 rounded-2xl focus:bg-white focus:border-primary-500 outline-none transition-all font-bold text-slate-800"
+                />
               </div>
-            ) : schedule.length === 0 ? (
-              <div className="py-20 text-center space-y-4">
-                <div className="w-20 h-20 bg-red-50 rounded-full flex items-center justify-center mx-auto">
-                  <Calendar className="w-10 h-10 text-red-300" />
-                </div>
-                <p className="text-slate-500 font-bold">No available slots found for this doctor.</p>
-                <button onClick={() => setStep(1)} className="text-primary-600 font-bold hover:underline">Try another doctor</button>
+              <div className="bg-amber-50 border border-amber-100 p-4 rounded-2xl flex gap-3">
+                <Clock className="w-5 h-5 text-amber-500 shrink-0" />
+                <p className="text-xs text-amber-700 font-medium leading-relaxed">
+                  Please ensure the selected time does not conflict with other appointments. The system will record this timestamp exactly as entered.
+                </p>
               </div>
-            ) : (
-              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
-                {schedule.map(slot => {
-                   const date = new Date(slot.available_time);
-                   const isSelected = selectedSlotId === String(slot.id);
-                   return (
-                     <button
-                        key={slot.id}
-                        onClick={() => setSelectedSlotId(String(slot.id))}
-                        className={`p-4 rounded-2xl border-2 transition-all flex flex-col items-center gap-1 ${isSelected ? 'bg-primary-600 border-primary-600 text-white shadow-lg shadow-primary-500/30 scale-105' : 'bg-slate-50 border-slate-100 text-slate-600 hover:border-primary-200 hover:bg-white'}`}
-                     >
-                        <span className="text-[10px] font-black uppercase opacity-60">{date.toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}</span>
-                        <span className="text-lg font-black">{date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
-                        <span className="text-[9px] font-bold opacity-60">{date.toLocaleDateString(undefined, { weekday: 'short' })}</span>
-                     </button>
-                   );
-                })}
-              </div>
-            )}
+            </div>
 
             <div className="flex justify-between pt-4">
               <button onClick={() => setStep(1)} className="px-8 py-4 rounded-2xl font-bold text-slate-400 hover:bg-slate-50 transition-all">Go Back</button>
               <button
-                disabled={!selectedSlotId}
+                disabled={!appointmentTime}
                 onClick={() => setStep(3)}
                 className="group flex items-center gap-2 bg-slate-900 text-white px-8 py-4 rounded-2xl font-bold hover:bg-black transition-all shadow-xl active:scale-95 disabled:opacity-30"
               >
@@ -233,7 +219,7 @@ export function CreateAppointment() {
                     <p className="font-black text-lg">{patients.find(p => String(p.id) === selectedPatientId)?.name}</p>
                     <p className="text-sm font-bold text-primary-600">{doctors.find(d => String(d.doctor_id) === selectedDoctorId)?.doctor_name}</p>
                     <p className="text-xs text-slate-500 mt-1 flex items-center justify-center md:justify-start gap-1 font-bold">
-                      <Calendar className="w-3 h-3" /> {new Date(schedule.find(s => String(s.id) === selectedSlotId)?.available_time).toLocaleString()}
+                      <Calendar className="w-3 h-3" /> {new Date(appointmentTime).toLocaleString()}
                     </p>
                   </div>
                </div>

@@ -146,7 +146,6 @@ export const getPayments = async (req: Request, res: Response): Promise<any> => 
                 pay.appointment_id, 
                 pay.amount, 
                 pay.status, 
-                pay.created_at,
                 p.name as patient_name,
                 u.fullname as doctor_name
             FROM payment pay
