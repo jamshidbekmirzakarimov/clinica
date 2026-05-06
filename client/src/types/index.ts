@@ -24,7 +24,7 @@ export interface Doctor {
   specialty: string;
   phone: string;
   email: string;
-  schedule: string; // e.g., "Mon-Fri, 09:00-17:00"
+  slots?: string[]; // Array of ISO date strings
 }
 
 export interface Cashier {
@@ -37,36 +37,24 @@ export interface Cashier {
 export interface Patient {
   id: string;
   name: string;
+  age: number;
   phone: string;
-  dob: string;
-  gender: 'Male' | 'Female' | 'Other';
-  address: string;
 }
-
-export type AppointmentStatus =
-'pending' |
-'confirmed' |
-'completed' |
-'cancelled';
 
 export interface Appointment {
   id: string;
-  patientId: string;
-  doctorId: string;
-  date: string; // YYYY-MM-DD
-  time: string; // HH:mm
-  status: AppointmentStatus;
-  diagnosis?: string;
-  prescription?: string;
+  doctor_id: number;
+  patient_id: number;
+  appointment_time: string; // ISO string
+  doctor_name?: string;
+  patient_name?: string;
 }
 
-export type PaymentStatus = 'pending' | 'paid';
+export type PaymentStatus = 'pending' | 'paid' | 'failed';
 
 export interface Payment {
   id: string;
-  appointmentId: string;
-  patientId: string;
+  appointment_id: number;
   amount: number;
-  date: string;
   status: PaymentStatus;
 }

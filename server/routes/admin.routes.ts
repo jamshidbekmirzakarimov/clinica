@@ -2,7 +2,7 @@ import { Router } from 'express';
 import { 
     createDoctor, getDoctors, updateDoctor, deleteDoctor,
     createCashier, getCashiers, updateCashier, deleteCashier,
-    getAppointments
+    getAppointments, addDoctorSchedule, getDoctorSchedule
 } from '../controllers/admin.controller';
 import { authenticateToken } from '../middleware/auth.middleware';
 import { authorizeAdmin } from '../middleware/role.middleware';
@@ -18,6 +18,8 @@ const router = Router();
  *     description: Administrative operations for Cashiers
  *   - name: Admin - Appointments
  *     description: Administrative operations for Appointments
+ *   - name: Admin - Schedule
+ *     description: Doctor availability scheduling
  */
 
 /**
@@ -296,5 +298,68 @@ router.delete('/cashiers/:id', authenticateToken, authorizeAdmin, deleteCashier)
  *         description: Forbidden
  */
 router.get('/appointments', authenticateToken, authorizeAdmin, getAppointments);
+
+/**
+ * @swagger
+ * /api/admin/doctors/{id}/schedule:
+ *   post:
+ *     summary: Add time slots to a doctor's schedule (Admin only)
+ *     tags: [Admin - Schedule]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         description: The doctor ID
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - slots
+ *             properties:
+ *               slots:
+ *                 type: array
+ *                 items:
+ *                   type: string
+ *                   format: date-time
+ *                 description: Array of ISO date strings
+ *     responses:
+ *       201:
+ *         description: Schedule updated successfully
+ *       404:
+ *         description: Doctor not found
+ *       401:
+ *         description: Unauthorized
+ */
+router.post('/doctors/:id/schedule', authenticateToken, authorizeAdmin, addDoctorSchedule);
+
+/**
+ * @swagger
+ * /api/admin/doctors/{id}/schedule:
+ *   get:
+ *     summary: Get a doctor's schedule (Admin only)
+ *     tags: [Admin - Schedule]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         description: The doctor ID
+ *     responses:
+ *       200:
+ *         description: A doctor's schedule
+ *       401:
+ *         description: Unauthorized
+ */
+router.get('/doctors/:id/schedule', authenticateToken, authorizeAdmin, getDoctorSchedule);
 
 export default router;

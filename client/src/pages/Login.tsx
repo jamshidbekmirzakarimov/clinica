@@ -4,6 +4,7 @@ import { useAuthStore } from '../store/useAuthStore';
 import { Stethoscope, Lock, Mail, Loader2 } from 'lucide-react';
 import api from '../utils/api';
 import { AuthResponse } from '../types';
+import { toast } from 'react-toastify';
 
 export function Login() {
   const [email, setEmail] = useState('');
@@ -26,6 +27,7 @@ export function Login() {
 
       const { user, tokens } = response.data;
       login(user, tokens);
+      toast.success(`Xush kelibsiz, ${user.fullname}!`);
       
       // Redirect based on role
       navigate(`/${user.role}`);

@@ -12,12 +12,10 @@ const options: swaggerJsdoc.Options = {
         },
         servers: [
             {
-                url: 'https://clinica-1-o4l9.onrender.com',
-                description: 'Production server',
-            },
-            {
-                url: 'http://localhost:5000',
-                description: 'Local server',
+                url: process.env.NODE_ENV === 'production' 
+                    ? 'https://clinica-1-o4l9.onrender.com' 
+                    : 'http://localhost:5000',
+                description: process.env.NODE_ENV === 'production' ? 'Production server' : 'Local development server',
             },
         ],
         components: {

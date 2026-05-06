@@ -290,3 +290,55 @@ export const getAppointments = async (req: Request, res: Response): Promise<any>
     }
 };
 
+// --- DOCTOR SCHEDULE ---
+
+export const addDoctorSchedule = async (req: Request, res: Response): Promise<any> => {
+    const { doctor_id, slots } = req.body; // slots: Array of strings (ISO format)
+
+    if (!doctor_id || !slots || !Array.isArray(slots)) {
+        return res.status(400).json({ message: 'doctor_id and an array of slots are required' });
+    }
+
+    try {
+        // Check if doctor exists
+        const doctorCheck = await pool.query('SELECT id FROM doctors WHERE id = $1', [doctor_id]);
+        if (doctorCheck.rows.length === 0) {
+            return res.status(404).json({ message: 'Doctor not found' });
+        }
+
+        // Insert slots
+        if (slots.length > 0) {
+            // Using parameterized query for security
+            // Constructing the query carefully
+            const placeholders = slots.map((_, i) => `($1, $${i + 2})`).join(', ');
+            const query = `INSERT INTO doctor_schedule (doctor_id, available_time) VALUES ${placeholders} ON CONFLICT DO NOTHING`;
+            
+            await pool.query(query, [doctor_id, ...slots]);
+        }
+
+        res.status(201).json({ message: 'Schedule updated successfully' });
+    } catch (error) {
+        console.error('Add schedule error:', error);
+        res.status(500).json({ message: 'Internal server error' });
+    }
+};
+
+export const getDoctorSchedule = async (req: Request, res: Response): Promise<any> => {
+    const { id } = req.params; // doctor_id
+
+    try {
+        const query = `
+            SELECT id, available_time, is_booked 
+            FROM doctor_schedule 
+            WHERE doctor_id = $1 
+            ORDER BY available_time ASC
+        `;
+        const result = await pool.query(query, [id]);
+        res.status(200).json({ schedule: result.rows });
+    } catch (error) {
+        console.error('Get schedule error:', error);
+        res.status(500).json({ message: 'Internal server error' });
+    }
+};
+
+

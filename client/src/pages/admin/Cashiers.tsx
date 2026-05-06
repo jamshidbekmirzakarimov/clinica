@@ -3,15 +3,20 @@ import { Plus, Edit2, Trash2, Search } from 'lucide-react';
 import { Cashier } from '../../types';
 import { Modal } from '../../components/ui/Modal';
 import api from '../../utils/api';
+import { toast } from 'react-toastify';
+import { Loader2 } from 'lucide-react';
 
 export function AdminCashiers() {
   const [cashiers, setCashiers] = useState<Cashier[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingCashier, setEditingCashier] = useState<Cashier | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [isPageLoading, setIsPageLoading] = useState(true);
 
   useEffect(() => {
     const fetchCashiers = async () => {
+      setIsPageLoading(true);
       try {
         const response = await api.get('/admin/cashiers');
         const fetchedCashiers: Cashier[] = response.data.cashiers.map((c: any) => ({
@@ -23,6 +28,9 @@ export function AdminCashiers() {
         setCashiers(fetchedCashiers);
       } catch (error) {
         console.error('Failed to fetch cashiers:', error);
+        toast.error('Failed to load cashiers');
+      } finally {
+        setIsPageLoading(false);
       }
     };
     fetchCashiers();
@@ -57,8 +65,9 @@ export function AdminCashiers() {
     }
     setIsModalOpen(true);
   };
-  const handleSubmit = async (e: React.FormEvent) => {
+   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setIsLoading(true);
     try {
       if (editingCashier) {
         await api.put(`/admin/cashiers/${editingCashier.id}`, {
@@ -78,6 +87,7 @@ export function AdminCashiers() {
           c
           )
         );
+        toast.success('Cashier updated successfully');
       } else {
         const response = await api.post('/admin/cashiers', {
           fullname: formData.name,
@@ -94,21 +104,28 @@ export function AdminCashiers() {
           phone: formData.phone
         }]
         );
+        toast.success('Cashier created successfully');
       }
       setIsModalOpen(false);
     } catch (error: any) {
       console.error('Failed to save cashier:', error);
-      alert(error.response?.data?.message || 'Failed to save cashier');
+      toast.error(error.response?.data?.message || 'Failed to save cashier');
+    } finally {
+      setIsLoading(false);
     }
   };
   const handleDelete = async (id: string) => {
     if (window.confirm('Are you sure you want to delete this cashier?')) {
+      setIsLoading(true);
       try {
         await api.delete(`/admin/cashiers/${id}`);
         setCashiers(cashiers.filter((c) => c.id !== id));
+        toast.success('Cashier deleted successfully');
       } catch (error: any) {
         console.error('Failed to delete cashier:', error);
-        alert(error.response?.data?.message || 'Failed to delete cashier');
+        toast.error(error.response?.data?.message || 'Failed to delete cashier');
+      } finally {
+        setIsLoading(false);
       }
     }
   };
@@ -155,8 +172,21 @@ export function AdminCashiers() {
                 <th className="px-6 py-3 font-medium text-right">Actions</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-200">
-              {filteredCashiers.map((cashier) =>
+             <tbody className="divide-y divide-slate-200">
+               {isPageLoading ? (
+                 <tr>
+                    <td colSpan={4} className="px-6 py-10 text-center text-slate-500">
+                      <Loader2 className="w-6 h-6 animate-spin mx-auto mb-2" />
+                      Loading cashiers...
+                    </td>
+                 </tr>
+               ) : filteredCashiers.length === 0 ? (
+                 <tr>
+                    <td colSpan={4} className="px-6 py-10 text-center text-slate-500">
+                      No cashiers found.
+                    </td>
+                 </tr>
+               ) : filteredCashiers.map((cashier) =>
               <tr key={cashier.id} className="hover:bg-slate-50">
                   <td className="px-6 py-4 whitespace-nowrap font-medium text-slate-900">
                     {cashier.name}
@@ -268,10 +298,12 @@ export function AdminCashiers() {
               
               Cancel
             </button>
-            <button
+             <button
               type="submit"
-              className="px-4 py-2 text-sm font-medium text-white bg-primary-600 rounded-lg hover:bg-primary-700">
+              disabled={isLoading}
+              className="px-4 py-2 text-sm font-medium text-white bg-primary-600 rounded-lg hover:bg-primary-700 flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed">
               
+              {isLoading && <Loader2 className="w-4 h-4 animate-spin" />}
               {editingCashier ? 'Save Changes' : 'Add Cashier'}
             </button>
           </div>

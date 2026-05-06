@@ -4,7 +4,9 @@ import {
     createAppointment, 
     createPayment,
     getPatients,
-    getDoctorsList
+    getDoctorsList,
+    getDoctorSchedule,
+    getPayments
 } from '../controllers/cashier.controller';
 import { authenticateToken } from '../middleware/auth.middleware';
 import { authorizeCashier } from '../middleware/role.middleware';
@@ -99,6 +101,30 @@ router.get('/doctors', authenticateToken, authorizeCashier, getDoctorsList);
 
 /**
  * @swagger
+ * /api/cashier/doctors/{id}/schedule:
+ *   get:
+ *     summary: Get schedule for a specific doctor (Cashier only)
+ *     tags: [Cashier - Doctors]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: Doctor schedule
+ *       401:
+ *         description: Unauthorized
+ *       403:
+ *         description: Forbidden
+ */
+router.get('/doctors/:id/schedule', authenticateToken, authorizeCashier, getDoctorSchedule);
+
+/**
+ * @swagger
  * /api/cashier/appointments:
  *   post:
  *     summary: Create a new appointment (Cashier only)
@@ -179,5 +205,23 @@ router.post('/appointments', authenticateToken, authorizeCashier, createAppointm
  *         description: Forbidden (Not a cashier)
  */
 router.post('/payments', authenticateToken, authorizeCashier, createPayment);
+
+/**
+ * @swagger
+ * /api/cashier/payments:
+ *   get:
+ *     summary: Get list of all payments recorded (Cashier only)
+ *     tags: [Cashier - Payments]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: A list of payments
+ *       401:
+ *         description: Unauthorized
+ *       403:
+ *         description: Forbidden
+ */
+router.get('/payments', authenticateToken, authorizeCashier, getPayments);
 
 export default router;

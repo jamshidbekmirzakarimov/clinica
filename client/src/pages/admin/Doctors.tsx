@@ -1,30 +1,49 @@
 import React, { useState, useEffect } from 'react';
-import { Plus, Edit2, Trash2, Search } from 'lucide-react';
+import { Plus, Edit2, Trash2, Search, Calendar, Clock, X } from 'lucide-react';
 import { Doctor } from '../../types';
 import { Modal } from '../../components/ui/Modal';
 import api from '../../utils/api';
+import { toast } from 'react-toastify';
+import { Loader2 } from 'lucide-react';
 
 export function AdminDoctors() {
   const [doctors, setDoctors] = useState<Doctor[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingDoctor, setEditingDoctor] = useState<Doctor | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [isPageLoading, setIsPageLoading] = useState(true);
 
-  useEffect(() => {
+   useEffect(() => {
     const fetchDoctors = async () => {
+      setIsPageLoading(true);
       try {
         const response = await api.get('/admin/doctors');
-        const fetchedDoctors: Doctor[] = response.data.doctors.map((d: any) => ({
-          id: String(d.doctor_id),
-          name: d.fullname,
-          specialty: d.specialization,
-          phone: d.phone,
-          email: d.email,
-          schedule: 'TBD'
+        const fetchedDoctors: Doctor[] = await Promise.all(response.data.doctors.map(async (d: any) => {
+          // Fetch slots for each doctor
+          let slots: string[] = [];
+          try {
+            const slotsRes = await api.get(`/admin/doctors/${d.doctor_id}/schedule`);
+            slots = slotsRes.data.schedule.map((s: any) => s.available_time);
+          } catch (err) {
+            console.error(`Failed to fetch slots for doctor ${d.doctor_id}`, err);
+          }
+
+          return {
+            id: String(d.doctor_id),
+            name: d.fullname,
+            specialty: d.specialization,
+            phone: d.phone,
+            email: d.email,
+            slots: slots
+          };
         }));
         setDoctors(fetchedDoctors);
       } catch (error) {
         console.error('Failed to fetch doctors:', error);
+        toast.error('Failed to load doctors');
+      } finally {
+        setIsPageLoading(false);
       }
     };
     fetchDoctors();
@@ -37,7 +56,7 @@ export function AdminDoctors() {
     phone: '',
     email: '',
     password: '',
-    schedule: ''
+    slots: [] as string[]
   });
   const filteredDoctors = doctors.filter(
     (d) =>
@@ -53,7 +72,7 @@ export function AdminDoctors() {
         phone: doctor.phone,
         email: doctor.email,
         password: '',
-        schedule: doctor.schedule
+        slots: doctor.slots || []
       });
     } else {
       setEditingDoctor(null);
@@ -63,13 +82,17 @@ export function AdminDoctors() {
         phone: '',
         email: '',
         password: '',
-        schedule: ''
+        slots: []
       });
     }
     setIsModalOpen(true);
   };
-  const handleSubmit = async (e: React.FormEvent) => {
+
+
+
+   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setIsLoading(true);
     try {
       if (editingDoctor) {
         await api.put(`/admin/doctors/${editingDoctor.id}`, {
@@ -79,6 +102,13 @@ export function AdminDoctors() {
           specialization: formData.specialty,
           phone: formData.phone
         });
+
+        // Update schedule
+        await api.post(`/admin/doctors/${editingDoctor.id}/schedule`, {
+          doctor_id: parseInt(editingDoctor.id),
+          slots: formData.slots
+        });
+
         setDoctors(
           doctors.map((d) =>
           d.id === editingDoctor.id ?
@@ -88,11 +118,12 @@ export function AdminDoctors() {
             specialty: formData.specialty,
             phone: formData.phone,
             email: formData.email,
-            schedule: formData.schedule
+            slots: formData.slots
           } :
           d
           )
         );
+        toast.success('Doctor updated successfully');
       } else {
         const response = await api.post('/admin/doctors', {
           fullname: formData.name,
@@ -102,32 +133,49 @@ export function AdminDoctors() {
           phone: formData.phone
         });
         const newDoctorData = response.data.doctor;
+        const newDoctorId = String(newDoctorData.id);
+
+        // Update schedule for new doctor
+        if (formData.slots.length > 0) {
+          await api.post(`/admin/doctors/${newDoctorId}/schedule`, {
+            doctor_id: parseInt(newDoctorId),
+            slots: formData.slots
+          });
+        }
+
         setDoctors([
         ...doctors,
         {
-          id: String(newDoctorData.id || `d${Date.now()}`),
+          id: newDoctorId,
           name: newDoctorData.fullname || formData.name,
           specialty: newDoctorData.specialization || formData.specialty,
           phone: newDoctorData.phone || formData.phone,
           email: newDoctorData.email || formData.email,
-          schedule: formData.schedule
+          slots: formData.slots
         }]
         );
+        toast.success('Doctor created successfully');
       }
       setIsModalOpen(false);
     } catch (error: any) {
       console.error('Failed to save doctor:', error);
-      alert(error.response?.data?.message || 'Failed to save doctor');
+      toast.error(error.response?.data?.message || 'Failed to save doctor');
+    } finally {
+      setIsLoading(false);
     }
   };
   const handleDelete = async (id: string) => {
     if (window.confirm('Are you sure you want to delete this doctor?')) {
+      setIsLoading(true);
       try {
         await api.delete(`/admin/doctors/${id}`);
         setDoctors(doctors.filter((d) => d.id !== id));
+        toast.success('Doctor deleted successfully');
       } catch (error: any) {
         console.error('Failed to delete doctor:', error);
-        alert(error.response?.data?.message || 'Failed to delete doctor');
+        toast.error(error.response?.data?.message || 'Failed to delete doctor');
+      } finally {
+        setIsLoading(false);
       }
     }
   };
@@ -176,7 +224,20 @@ export function AdminDoctors() {
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-200">
-              {filteredDoctors.map((doctor) =>
+              {isPageLoading ? (
+                <tr>
+                  <td colSpan={5} className="px-6 py-10 text-center text-slate-500">
+                    <Loader2 className="w-6 h-6 animate-spin mx-auto mb-2" />
+                    Loading doctors...
+                  </td>
+                </tr>
+              ) : filteredDoctors.length === 0 ? (
+                <tr>
+                  <td colSpan={5} className="px-6 py-10 text-center text-slate-500">
+                    No doctors found.
+                  </td>
+                </tr>
+              ) : filteredDoctors.map((doctor) =>
               <tr key={doctor.id} className="hover:bg-slate-50">
                   <td className="px-6 py-4 whitespace-nowrap font-medium text-slate-900">
                     {doctor.name}
@@ -195,7 +256,7 @@ export function AdminDoctors() {
                     </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-slate-600">
-                    {doctor.schedule}
+                    {doctor.slots?.length ? `${doctor.slots.length} slots` : 'No slots'}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                     <button
@@ -294,41 +355,24 @@ export function AdminDoctors() {
               
             </div>
           </div>
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1">
-                Password {editingDoctor && "(Leave blank to keep current)"}
-              </label>
-              <input
-                required={!editingDoctor}
-                type="password"
-                value={formData.password}
-                onChange={(e) =>
-                setFormData({
-                  ...formData,
-                  password: e.target.value
-                })
-                }
-                className="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:ring-primary-500 focus:border-primary-500" />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1">
-                Schedule
-              </label>
-              <input
-                required
-                type="text"
-                placeholder="e.g., Mon-Fri, 09:00-17:00"
-                value={formData.schedule}
-                onChange={(e) =>
-                setFormData({
-                  ...formData,
-                  schedule: e.target.value
-                })
-                }
-                className="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:ring-primary-500 focus:border-primary-500" />
-            </div>
+          <div>
+            <label className="block text-sm font-medium text-slate-700 mb-1">
+              Password {editingDoctor && "(Leave blank to keep current)"}
+            </label>
+            <input
+              required={!editingDoctor}
+              type="password"
+              value={formData.password}
+              onChange={(e) =>
+              setFormData({
+                ...formData,
+                password: e.target.value
+              })
+              }
+              className="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:ring-primary-500 focus:border-primary-500" />
           </div>
+
+
           <div className="pt-4 flex justify-end gap-3">
             <button
               type="button"
@@ -339,8 +383,10 @@ export function AdminDoctors() {
             </button>
             <button
               type="submit"
-              className="px-4 py-2 text-sm font-medium text-white bg-primary-600 rounded-lg hover:bg-primary-700">
+              disabled={isLoading}
+              className="px-4 py-2 text-sm font-medium text-white bg-primary-600 rounded-lg hover:bg-primary-700 flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed">
               
+              {isLoading && <Loader2 className="w-4 h-4 animate-spin" />}
               {editingDoctor ? 'Save Changes' : 'Add Doctor'}
             </button>
           </div>

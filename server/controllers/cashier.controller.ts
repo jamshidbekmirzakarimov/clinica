@@ -120,3 +120,46 @@ export const getDoctorsList = async (req: Request, res: Response): Promise<any> 
         res.status(500).json({ message: 'Internal server error' });
     }
 };
+export const getDoctorSchedule = async (req: Request, res: Response): Promise<any> => {
+    const { id } = req.params; // doctor_id
+
+    try {
+        const query = `
+            SELECT id, available_time, is_booked 
+            FROM doctor_schedule 
+            WHERE doctor_id = $1 
+            ORDER BY available_time ASC
+        `;
+        const result = await pool.query(query, [id]);
+        res.status(200).json({ schedule: result.rows });
+    } catch (error) {
+        console.error('Get schedule error:', error);
+        res.status(500).json({ message: 'Internal server error' });
+    }
+};
+
+export const getPayments = async (req: Request, res: Response): Promise<any> => {
+    try {
+        const query = `
+            SELECT 
+                pay.id, 
+                pay.appointment_id, 
+                pay.amount, 
+                pay.status, 
+                pay.created_at,
+                p.name as patient_name,
+                u.fullname as doctor_name
+            FROM payment pay
+            JOIN appointment a ON pay.appointment_id = a.id
+            JOIN patients p ON a.patient_id = p.id
+            JOIN doctors d ON a.doctor_id = d.id
+            JOIN users u ON d.user_id = u.id
+            ORDER BY pay.id DESC
+        `;
+        const result = await pool.query(query);
+        res.status(200).json({ payments: result.rows });
+    } catch (error) {
+        console.error('Get payments error:', error);
+        res.status(500).json({ message: 'Internal server error' });
+    }
+};
