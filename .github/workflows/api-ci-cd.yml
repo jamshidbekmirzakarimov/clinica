@@ -48,6 +48,21 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      - name: Validate AWS Credentials
+        run: |
+          if [ -z "${{ secrets.AWS_ACCESS_KEY_ID }}" ]; then
+            echo "::error::AWS_ACCESS_KEY_ID is missing in GitHub Secrets! Please add it in Settings -> Secrets and variables -> Actions."
+            exit 1
+          fi
+          if [ -z "${{ secrets.AWS_SECRET_ACCESS_KEY }}" ]; then
+            echo "::error::AWS_SECRET_ACCESS_KEY is missing in GitHub Secrets! Please add it in Settings -> Secrets and variables -> Actions."
+            exit 1
+          fi
+          if [ -z "${{ secrets.AWS_REGION }}" ]; then
+            echo "::error::AWS_REGION is missing in GitHub Secrets! Please add it in Settings -> Secrets and variables -> Actions."
+            exit 1
+          fi
+
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v2
         with:
