@@ -84,16 +84,16 @@ jobs:
             docker stop clinika-website || true
             docker rm -f clinika-website || true
 
-            SECRETS_JSON=${aws secretsmanager get-secret-value \
-             --secret-id nodejs-prod-secrets \
-             --query SecretString \
-             --output text
+            SECRETS_JSON=$(aws secretsmanager get-secret-value \
+              --secret-id nodejs-prod-secrets \
+              --query SecretString \
+              --output text)
             export DATABASE_URL=$(echo $SECRETS_JSON | jq -r .DATABASE_URL)
             export ACCESS_TOKEN_SECRET=$(echo $SECRETS_JSON | jq -r .ACCESS_TOKEN_SECRET)
             export REFRESH_TOKEN_SECRET=$(echo $SECRETS_JSON | jq -r .REFRESH_TOKEN_SECRET)
 
             docker run -d \
-              -p $PORT:5000 \
+              -p ${PORT:-5000}:5000 \
               --name clinika-website \
               -e DATABASE_URL \
               -e ACCESS_TOKEN_SECRET \
