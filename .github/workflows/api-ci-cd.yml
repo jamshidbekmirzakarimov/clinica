@@ -80,13 +80,13 @@ jobs:
       - name: Configure AWS OIDC
         uses: aws-actions/configure-aws-credentials@v2
         with:
-          role-to-assume: ${{ env.CLEANED_AWS_OIDC_ROLE_ARN }}
-          aws-region: ${{ env.CLEANED_AWS_REGION }}
+          role-to-assume: ${{ secrets.AWS_OIDC_ROLE_ARN }}
+          aws-region: ${{ secrets.AWS_REGION }}
 
       # Login ECR
       - name: Login to ECR
         run: |
-          aws ecr get-login-password --region ${{ env.CLEANED_AWS_REGION }} | docker login --username AWS --password-stdin ${{ secrets.ECR_REPOSITORY }}
+          aws ecr get-login-password --region ${{ secrets.AWS_REGION }} | docker login --username AWS --password-stdin ${{ secrets.ECR_REPOSITORY }}
 
       # Build Docker image
       - name: Build Docker image
