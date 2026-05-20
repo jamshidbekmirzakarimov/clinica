@@ -123,7 +123,9 @@ export function Login() {
               </button>
             </div>
           </form>
-
+          <p className="mt-2 text-center text-sm text-slate-600">
+            Powered by Jamshidbek Mirzakarimov
+          </p>
           <div className="mt-6">
             <div className="relative">
               <div className="absolute inset-0 flex items-center">
