@@ -2,7 +2,7 @@ import axios from 'axios';
 import { useAuthStore } from '../store/useAuthStore';
 
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || 'http://34.227.11.217:5000/api',
+  baseURL: import.meta.env.VITE_API_URL || 'https://clinica-1-o4l9.onrender.com/api',
   headers: {
     'Content-Type': 'application/json',
   },
