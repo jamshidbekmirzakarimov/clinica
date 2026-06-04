@@ -23,6 +23,13 @@ import { CashierPayments } from './pages/cashier/Payments';
 // Doctor Pages
 import { DoctorDashboard } from './pages/doctor/Dashboard';
 import { DoctorAppointments } from './pages/doctor/MyAppointments';
+// CRM Pages
+import { Home } from './pages/Home';
+import { CrmLayout } from './crm/components/CrmLayout';
+import { ProductsPage } from './crm/pages/ProductsPage';
+import { SuppliersPage } from './crm/pages/SuppliersPage';
+import { CustomersPage } from './crm/pages/CustomersPage';
+import { OrdersPage } from './crm/pages/OrdersPage';
 
 export function App() {
   return (
@@ -146,8 +153,15 @@ export function App() {
         />
 
 
+        {/* CRM Routes */}
+        <Route path="/crm" element={<Navigate to="/crm/products" replace />} />
+        <Route path="/crm/products" element={<CrmLayout><ProductsPage /></CrmLayout>} />
+        <Route path="/crm/suppliers" element={<CrmLayout><SuppliersPage /></CrmLayout>} />
+        <Route path="/crm/customers" element={<CrmLayout><CustomersPage /></CrmLayout>} />
+        <Route path="/crm/orders" element={<CrmLayout><OrdersPage /></CrmLayout>} />
+
         {/* Default Route */}
-        <Route path="/" element={<Navigate to="/login" replace />} />
+        <Route path="/" element={<Home />} />
       </Routes>
       <ToastContainer 
         position="top-right"

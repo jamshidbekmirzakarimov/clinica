@@ -5,6 +5,7 @@ import authRoutes from "./routes/auth.routes"
 import adminRoutes from "./routes/admin.routes"
 import cashierRoutes from "./routes/cashier.routes"
 import doctorRoutes from "./routes/doctor.routes"
+import crmRoutes from "./routes/crm.routes"
 import { setupSwagger } from "./config/swagger"
 
 const app = express()
@@ -22,6 +23,7 @@ app.use('/api/auth', authRoutes)
 app.use('/api/admin', adminRoutes)
 app.use('/api/cashier', cashierRoutes)
 app.use('/api/doctor', doctorRoutes)
+app.use('/api/crm', crmRoutes)
 
 app.get('/api/health', (req, res) => {
   res.status(200).json({ status: 'healthy', timestamp: new Date() });

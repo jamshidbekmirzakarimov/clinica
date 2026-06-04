@@ -14,7 +14,8 @@ const options: swaggerJsdoc.Options = {
             { name: 'Auth', description: 'Authentication operations' },
             { name: 'Admin', description: 'Admin operations' },
             { name: 'Doctor', description: 'Doctor operations' },
-            { name: 'Cashier', description: 'Cashier operations' }
+            { name: 'Cashier', description: 'Cashier operations' },
+            { name: 'CRM', description: 'Omborxona / CRM operations' }
         ],
         servers: [
             {
