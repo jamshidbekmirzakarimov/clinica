@@ -19,7 +19,7 @@ export function Home() {
           </Link>
 
           {/* Omborxona */}
-          <Link to="/crm/products" className="bg-white p-8 rounded-2xl shadow-sm hover:shadow-md transition-shadow border border-gray-100 flex flex-col items-center group">
+          <Link to="/crm/login" className="bg-white p-8 rounded-2xl shadow-sm hover:shadow-md transition-shadow border border-gray-100 flex flex-col items-center group">
             <div className="w-20 h-20 bg-emerald-100 text-emerald-600 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
               <Package size={40} />
             </div>
