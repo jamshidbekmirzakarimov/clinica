@@ -39,23 +39,28 @@ export function CrmLogin() {
     }
   };
   return (
-    <div className="min-h-screen bg-slate-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
-      <div className="sm:mx-auto sm:w-full sm:max-w-md">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-emerald-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8 relative overflow-hidden">
+      {/* Decorative background blobs */}
+      <div className="absolute top-0 left-1/4 w-96 h-96 bg-emerald-200/40 rounded-full mix-blend-multiply filter blur-3xl opacity-70 animate-blob"></div>
+      <div className="absolute top-0 right-1/4 w-96 h-96 bg-teal-200/40 rounded-full mix-blend-multiply filter blur-3xl opacity-70 animate-blob animation-delay-2000"></div>
+      <div className="absolute -bottom-32 left-1/3 w-96 h-96 bg-emerald-100/50 rounded-full mix-blend-multiply filter blur-3xl opacity-70 animate-blob animation-delay-4000"></div>
+      
+      <div className="sm:mx-auto sm:w-full sm:max-w-md relative z-10">
         <div className="flex justify-center text-emerald-600">
-          <div className="p-3 bg-emerald-100 rounded-full">
-            <Package className="w-10 h-10" />
+          <div className="p-4 bg-white shadow-xl shadow-emerald-200/50 rounded-2xl border border-emerald-50 transform transition hover:scale-105 duration-300">
+            <Package className="w-12 h-12" strokeWidth={1.5} />
           </div>
         </div>
         <h2 className="mt-6 text-center text-3xl font-bold tracking-tight text-slate-900">
           Omborxona CRM
         </h2>
-        <p className="mt-2 text-center text-sm text-slate-600">
+        <p className="mt-3 text-center text-base text-slate-500 font-medium">
           Tizimga kirish uchun ma'lumotlarni kiriting
         </p>
       </div>
 
-      <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
-        <div className="bg-white py-8 px-4 shadow sm:rounded-xl sm:px-10 border border-slate-200">
+      <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md relative z-10">
+        <div className="bg-white/80 backdrop-blur-xl py-10 px-6 shadow-2xl shadow-slate-200/50 sm:rounded-3xl sm:px-12 border border-white">
           <form className="space-y-6" onSubmit={handleSubmit}>
             {error &&
             <div className="bg-red-50 text-red-600 p-3 rounded-lg text-sm text-center">
@@ -80,7 +85,7 @@ export function CrmLogin() {
                   required
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="block w-full pl-10 sm:text-sm border-slate-300 rounded-lg focus:ring-emerald-500 focus:border-emerald-500 py-2.5 border"
+                  className="block w-full pl-11 sm:text-sm border-slate-200 bg-slate-50/50 rounded-xl focus:ring-emerald-500 focus:border-emerald-500 py-3 border transition-all duration-200 hover:bg-white"
                   placeholder="admin@crm.com" />
                 
               </div>
@@ -103,7 +108,7 @@ export function CrmLogin() {
                   required
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="block w-full pl-10 sm:text-sm border-slate-300 rounded-lg focus:ring-emerald-500 focus:border-emerald-500 py-2.5 border"
+                  className="block w-full pl-11 sm:text-sm border-slate-200 bg-slate-50/50 rounded-xl focus:ring-emerald-500 focus:border-emerald-500 py-3 border transition-all duration-200 hover:bg-white"
                   placeholder="••••••••" />
                 
               </div>
@@ -113,7 +118,7 @@ export function CrmLogin() {
               <button
                 type="submit"
                 disabled={isLoading}
-                className="w-full flex justify-center py-2.5 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-emerald-600 hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500 transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
+                className="w-full flex justify-center py-3 px-4 border border-transparent rounded-xl shadow-lg shadow-emerald-600/30 text-sm font-semibold text-white bg-emerald-600 hover:bg-emerald-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500 transform transition-all duration-200 hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none">
                 {isLoading ? (
                   <Loader2 className="w-5 h-5 animate-spin" />
                 ) : (
