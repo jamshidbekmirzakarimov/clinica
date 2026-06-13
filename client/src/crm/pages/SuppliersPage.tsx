@@ -52,7 +52,7 @@ export function SuppliersPage() {
   return (
     <div>
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold text-gray-800">Yetkazib beruvchilar</h1>
+        <h1 className="text-2xl font-bold text-gray-800">Retake</h1>
         <button onClick={() => handleOpenModal()} className="bg-blue-600 text-white px-4 py-2 rounded-lg flex items-center gap-2 hover:bg-blue-700">
           <Plus size={20} /> Qo'shish
         </button>

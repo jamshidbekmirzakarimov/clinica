@@ -11,7 +11,7 @@ export function CrmSidebar() {
   const navItems = [
     { name: 'Dashboard', path: '/crm/dashboard', icon: <LayoutDashboard size={20} /> },
     { name: 'Mahsulotlar', path: '/crm/products', icon: <Package size={20} /> },
-    { name: 'Yetkazib beruvchilar', path: '/crm/suppliers', icon: <Truck size={20} /> },
+    { name: 'Retake', path: '/crm/suppliers', icon: <Truck size={20} /> },
     { name: 'Mijozlar', path: '/crm/customers', icon: <Users size={20} /> },
     { name: 'Buyurtmalar', path: '/crm/orders', icon: <ShoppingCart size={20} /> },
   ];
